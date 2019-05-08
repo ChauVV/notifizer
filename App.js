@@ -60,7 +60,7 @@ export default class App extends Component<Props> {
               message: "notification.data.title",
               description: JSON.stringify(notification.data.Message),
               type: "info",
-              duration: 4000
+              duration: 4000,
               onPress: () => {
                 Alert.alert(
                   'you press on noti android', 'Message here',
