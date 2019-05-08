@@ -11,6 +11,7 @@ import {Platform, StyleSheet, Text, View, AsyncStorage, Alert} from 'react-nativ
 
 import firebase from 'react-native-firebase';
 import PushNotification from 'react-native-push-notification'
+import FlashMessage, { showMessage, hideMessage }  from "react-native-flash-message";
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
@@ -31,7 +32,7 @@ export default class App extends Component<Props> {
           var seen = [];
           if (notification && notification.data) {
             Alert.alert(
-              'notification.data.title', JSON.stringify(notification.data),
+              'notification.data.title', JSON.stringify(notification.data.Message),
               [
                   { text: 'OK', onPress: () => console.log('OK Pressed') },
               ],
@@ -46,22 +47,32 @@ export default class App extends Component<Props> {
     });
     firebase.notifications().onNotification((notification: Notification) => {
         if (notification && notification.data) {
-          // Alert.alert(
-          //   notification.data.title, JSON.stringify(notification.data.Message),
-          //   [
-          //       { text: 'OK', onPress: () => console.log('OK Pressed') },
-          //   ],
-          //   { cancelable: false },
-          // );
-          PushNotification.localNotification({
-            title: 'notification.data.title',
-            message: JSON.stringify(notification.data),
-            smallIcon: 'ic_notification',
-            playSound: true,
-            soundName: 'default'
-          })
+          if (Platform.OS === 'ios') {
+            PushNotification.localNotification({
+              title: 'notification.data.title',
+              message: JSON.stringify(notification.data.Message),
+              smallIcon: 'ic_launcher',
+              playSound: true,
+              soundName: 'default'
+            })
+          } else {
+            showMessage({
+              message: "notification.data.title",
+              description: JSON.stringify(notification.data.Message),
+              type: "info",
+              duration: 4000
+              onPress: () => {
+                Alert.alert(
+                  'you press on noti android', 'Message here',
+                  [
+                      { text: 'OK', onPress: () => console.log('OK Pressed') },
+                  ],
+                  { cancelable: false },
+                );
+              },
+            });
+          }
         }
-        
     });
     firebase.notifications().onNotificationOpened((notificationOpen: NotificationOpen) => {
         // Get the action triggered by the notification being opened
@@ -71,7 +82,7 @@ export default class App extends Component<Props> {
         var seen = [];
         if (notification && notification.data) {
           Alert.alert(
-            'notification.data.title', JSON.stringify(notification.data),
+            'notification.data.title', JSON.stringify(notification.data.Message),
             [
                 { text: 'OK', onPress: () => console.log('OK Pressed') },
             ],
@@ -127,6 +138,7 @@ async requestPermission() {
   render() {
     return (
       <View style={styles.container}>
+       <FlashMessage position="top" />
         <Text style={styles.welcome}>Welcome to React Native!</Text>
         <Text style={styles.instructions}>To get started, edit App.js</Text>
         <Text style={styles.instructions}>{instructions}</Text>
